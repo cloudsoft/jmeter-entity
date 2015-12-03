@@ -1,18 +1,18 @@
 package io.cloudsoft.jmeter;
 
-import com.google.common.collect.ImmutableList;
+import static java.lang.String.format;
+
+import java.util.List;
+
 import org.apache.brooklyn.api.entity.EntityLocal;
 import org.apache.brooklyn.core.entity.Entities;
 import org.apache.brooklyn.entity.java.JavaSoftwareProcessSshDriver;
 import org.apache.brooklyn.location.ssh.SshMachineLocation;
-import org.apache.brooklyn.util.core.config.ConfigBag;
 import org.apache.brooklyn.util.net.Urls;
 import org.apache.brooklyn.util.os.Os;
 import org.apache.brooklyn.util.ssh.BashCommands;
 
-import java.util.List;
-
-import static java.lang.String.format;
+import com.google.common.collect.ImmutableList;
 
 public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMeterDriver {
 
@@ -48,6 +48,10 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
                 .body.append("mkdir -p " + getRunDir())
                 .failOnNonZeroResultCode()
                 .execute();
+        copyPlan();
+    }
+
+    private void copyPlan() {
         copyTemplate(entity.getConfig(JMeterNode.TEST_PLAN_URL), getTestPlanLocation());
     }
 
@@ -78,9 +82,8 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
         return Urls.mergePaths(getRunDir(), "log.jtl");
     }
 
-
     @Override
-    public void runTestPlan(ConfigBag configBag) {
+    public void runTestPlan() {
         StringBuilder command = new StringBuilder(getExpandedInstallDir())
                 .append("/bin/jmeter ")
                 .append("-n ") // Non-GUI mode
@@ -91,4 +94,10 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
                 .failOnNonZeroResultCode()
                 .execute();
     }
+
+    @Override
+    public void reconfigure() {
+        copyPlan();
+    }
+
 }
