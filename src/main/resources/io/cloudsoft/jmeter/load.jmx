@@ -14,7 +14,7 @@
             <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
                 <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
                 <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-                    <boolProp name="LoopController.continue_forever">false</boolProp>
+                    <boolProp name="LoopController.continue_forever">${(config['jmeter.runForever']?c)!"true"}</boolProp>
                     <stringProp name="LoopController.loops">${(config['jmeter.numLoops']?c)!"100"}</stringProp>
                 </elementProp>
                 <stringProp name="ThreadGroup.num_threads">${(config['jmeter.numThreads']?c)!"10"}</stringProp>

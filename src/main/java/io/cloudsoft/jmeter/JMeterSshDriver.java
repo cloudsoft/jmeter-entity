@@ -13,6 +13,7 @@ import org.apache.brooklyn.util.os.Os;
 import org.apache.brooklyn.util.ssh.BashCommands;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMeterDriver {
 
@@ -44,20 +45,23 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
     @Override
     public void customize() {
-        newScript(CUSTOMIZING)
-                .body.append("mkdir -p " + getRunDir())
-                .failOnNonZeroResultCode()
-                .execute();
-        copyPlan();
-    }
-
-    private void copyPlan() {
-        copyTemplate(entity.getConfig(JMeterNode.TEST_PLAN_URL), getTestPlanLocation());
+        String template = entity.getConfig(JMeterNode.TEST_PLAN_URL);
+        copyTemplate(template, getTestPlanLocation(), true, ImmutableMap.<String,String>of());
     }
 
     @Override
     public void launch() {
-        // NO OP - is run in the effector
+        StringBuilder command = new StringBuilder("nohup ")
+                .append(getExpandedInstallDir())
+                .append("/bin/jmeter ")
+                .append("-n ") // Non-GUI mode
+                .append("-t ").append(getTestPlanLocation()).append(" ") // Test plan to run
+                .append("-l ").append(getLogFileLocation()).append(" ")  // Log file location
+                .append(" >/dev/null 2>/dev/null &");
+        newScript("run-test-plan").failOnNonZeroResultCode().body.append(command)
+                .gatherOutput()
+                .failOnNonZeroResultCode()
+                .execute();
     }
 
     @Override
@@ -70,7 +74,10 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
     @Override
     public void stop() {
-        // NO OP
+        // shutdown.sh is graceful. Could also use stoptest.sh to terminate abruptly.
+        StringBuilder command = new StringBuilder(getExpandedInstallDir())
+                .append("/bin/shutdown.sh");
+        newScript(STOPPING).body.append(command).execute();
     }
 
     protected String getTestPlanLocation() {
@@ -83,21 +90,8 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     }
 
     @Override
-    public void runTestPlan() {
-        StringBuilder command = new StringBuilder(getExpandedInstallDir())
-                .append("/bin/jmeter ")
-                .append("-n ") // Non-GUI mode
-                .append("-t ").append(getTestPlanLocation()).append(" ") // Test plan to run
-                .append("-l ").append(getLogFileLocation()).append(" "); // Log file location
-        newScript("run-test-plan").failOnNonZeroResultCode().body.append(command)
-                .gatherOutput()
-                .failOnNonZeroResultCode()
-                .execute();
-    }
-
-    @Override
     public void reconfigure() {
-        copyPlan();
+        customize();
     }
 
 }

@@ -1,20 +1,16 @@
 package io.cloudsoft.jmeter;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
 
 import org.apache.brooklyn.entity.software.base.SoftwareProcessImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, Runnable {
+public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
 
     private static final Logger LOG = LoggerFactory.getLogger(JMeterNodeImpl.class);
 
     private static final Object reconfigureLock = new Object[0];
-    ScheduledExecutorService executor = null;
 
     @Override
     protected void connectSensors() {
@@ -39,34 +35,22 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
     }
 
     @Override
-    public void run() {
+    public void pause() {
         if (getDriver() != null) {
-            LOG.trace("{} running plan", this);
-            synchronized (reconfigureLock) {
-                getDriver().runTestPlan();
-            }
+            getDriver().stop();
         }
     }
 
-    @Override
-    public void runRepeatedly() {
-        if (executor != null) {
-            throw new RuntimeException("Plan is already executing");
-        }
-        LOG.info("{} scheduling continual runs of plan", this);
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleWithFixedDelay(this, 0, 50, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void cancel() {
-        if (executor != null) {
-            LOG.info("{} cancelling subsequent runs of plan", this);
-            try {
-                executor.shutdown();
-            } finally {
-                executor = null;
-            }
+    /**
+     * Copies new configuration and cycles the JMeter process.
+     */
+    @GuardedBy("reconfigureLock")
+    private void reconfigure() {
+        if (getDriver() != null) {
+            getDriver().reconfigure();
+            pause();
+            getDriver().start();
+            LOG.debug("Reconfigured and restarted JMeter");
         }
     }
 
@@ -108,13 +92,6 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
 
     private long getDelayStep() {
         return getConfig(DELAY_STEP);
-    }
-
-    @GuardedBy("reconfigureLock")
-    private void reconfigure() {
-        if (getDriver() != null) {
-            getDriver().reconfigure();
-        }
     }
 
 }

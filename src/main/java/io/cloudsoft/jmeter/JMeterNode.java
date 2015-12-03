@@ -26,6 +26,11 @@ public interface JMeterNode extends SoftwareProcess {
             "jmeter.testPlan", "A URL of a jmx file to run",
             "classpath://io/cloudsoft/jmeter/load.jmx");
 
+    @SetFromFlag("runForever")
+    ConfigKey<Boolean> RUN_FOREVER = ConfigKeys.newBooleanConfigKey(
+            "jmeter.runForever", "Whether JMeter should run until instructed to stop. Overrides jmeter.numLoops.",
+            true);
+
     @SetFromFlag("loops")
     ConfigKey<Integer> NUM_LOOPS = ConfigKeys.newIntegerConfigKey(
             "jmeter.numLoops", "The number of loops each thread should make",
@@ -51,18 +56,9 @@ public interface JMeterNode extends SoftwareProcess {
             "jmeter.delayStep", "The delay to change by when increasing/decreasing load",
             20L);
 
-    // Name of method intentionally coincides with Runnable.run.
-    MethodEffector<Void> RUN_TEST_PLAN = new MethodEffector<>(JMeterNode.class, "run");
-    @Effector(description = "Runs the JMeter test plan specified in jmeter.testPlan once")
-    void run();
-
-    MethodEffector<Void> SCHEDULE_TEST_PLAN = new MethodEffector<>(JMeterNode.class, "runRepeatedly");
-    @Effector(description = "Runs the JMeter test plan specified in jmeter.testPlan repeatedly")
-    void runRepeatedly();
-
-    MethodEffector<Void> CANCEL = new MethodEffector<>(JMeterNode.class, "cancel");
-    @Effector(description = "Cancel subsequent executions of the test plan")
-    void cancel();
+    MethodEffector<Void> PAUSE = new MethodEffector<>(JMeterNode.class, "pause");
+    @Effector(description = "Stop the JMeter test plan's execution")
+    void pause();
 
     MethodEffector<Void> INCREASE_LOAD = new MethodEffector<>(JMeterNode.class, "increaseLoad");
     @Effector(description = "Increase generated load")
