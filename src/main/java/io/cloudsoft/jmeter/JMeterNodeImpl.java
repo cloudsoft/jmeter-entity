@@ -78,8 +78,8 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
             setConfig(NUM_THREADS, numThreads);
             Long delay = Math.max(0, getConfig(REQUEST_DELAY) - getDelayStep());
             setConfig(REQUEST_DELAY, delay);
-            LOG.info("{} increasing load generated in future runs of plan: numThreads={}, delay={}",
-                    new Object[]{this, numThreads, delay});
+            LOG.info("{} increasing load generated in future runs of plan: numThreads={}, delay={}, potential requests/second={}",
+                    new Object[]{this, numThreads, delay, getPotentialRequestsPerSecond(numThreads, delay)});
             reconfigure();
         }
     }
@@ -92,10 +92,14 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
             long delay = getConfig(REQUEST_DELAY) + getDelayStep();
             setConfig(NUM_THREADS, numThreads);
             setConfig(REQUEST_DELAY, delay);
-            LOG.info("{} decreasing load generated in future runs of plan: numThreads={}, delay={}",
-                    new Object[]{this, numThreads, delay});
+            LOG.info("{} decreasing load generated in future runs of plan: numThreads={}, delay={}, potential requests/second={}",
+                    new Object[]{this, numThreads, delay, getPotentialRequestsPerSecond(numThreads, delay)});
             reconfigure();
         }
+    }
+
+    private long getPotentialRequestsPerSecond(int numThreads, long delay) {
+        return numThreads * (1000 / delay);
     }
 
     private int getThreadStep() {
