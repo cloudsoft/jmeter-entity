@@ -23,9 +23,13 @@
                 <longProp name="ThreadGroup.end_time">1431000502000</longProp>
                 <boolProp name="ThreadGroup.scheduler">false</boolProp>
                 <stringProp name="ThreadGroup.duration"></stringProp>
-                <stringProp name="ThreadGroup.delay">${(config['jmeter.requestDelay']?c)!"100"}</stringProp>
+                <stringProp name="ThreadGroup.delay"></stringProp>
             </ThreadGroup>
             <hashTree>
+                <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+                  <stringProp name="ConstantTimer.delay">${(config['jmeter.requestDelay']?c)!"100"}</stringProp>
+                </ConstantTimer>
+                <hashTree/>
                 <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
                     <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
                         <collectionProp name="Arguments.arguments"/>

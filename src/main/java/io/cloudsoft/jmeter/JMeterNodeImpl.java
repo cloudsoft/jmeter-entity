@@ -41,8 +41,10 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
     @Override
     public void run() {
         if (getDriver() != null) {
-            LOG.info("{} running plan", this);
-            getDriver().runTestPlan();
+            LOG.trace("{} running plan", this);
+            synchronized (reconfigureLock) {
+                getDriver().runTestPlan();
+            }
         }
     }
 
@@ -71,11 +73,13 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
     @Override
     public void increaseLoad() {
         synchronized (reconfigureLock) {
-            LOG.info("{} increasing load generated in future runs of plan", this);
             // Increase number of threads and decrease the time each one waits
-            setConfig(NUM_THREADS, getConfig(NUM_THREADS) + getThreadStep());
+            int numThreads = getConfig(NUM_THREADS) + getThreadStep();
+            setConfig(NUM_THREADS, numThreads);
             Long delay = Math.max(0, getConfig(REQUEST_DELAY) - getDelayStep());
             setConfig(REQUEST_DELAY, delay);
+            LOG.info("{} increasing load generated in future runs of plan: numThreads={}, delay={}",
+                    new Object[]{this, numThreads, delay});
             reconfigure();
         }
     }
@@ -83,11 +87,13 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode, R
     @Override
     public void decreaseLoad() {
         synchronized (reconfigureLock) {
-            LOG.info("{} decreasing load generated in future runs of plan", this);
             // Decrease number of threads and increase the time each one waits
             Integer numThreads = Math.max(1, getConfig(NUM_THREADS) - getThreadStep());
+            long delay = getConfig(REQUEST_DELAY) + getDelayStep();
             setConfig(NUM_THREADS, numThreads);
-            setConfig(REQUEST_DELAY, getConfig(REQUEST_DELAY) + getDelayStep());
+            setConfig(REQUEST_DELAY, delay);
+            LOG.info("{} decreasing load generated in future runs of plan: numThreads={}, delay={}",
+                    new Object[]{this, numThreads, delay});
             reconfigure();
         }
     }

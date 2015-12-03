@@ -51,6 +51,7 @@ public interface JMeterNode extends SoftwareProcess {
             "jmeter.delayStep", "The delay to change by when increasing/decreasing load",
             20L);
 
+    // Name of method intentionally coincides with Runnable.run.
     MethodEffector<Void> RUN_TEST_PLAN = new MethodEffector<>(JMeterNode.class, "run");
     @Effector(description = "Runs the JMeter test plan specified in jmeter.testPlan once")
     void run();
