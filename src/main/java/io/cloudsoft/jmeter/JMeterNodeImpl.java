@@ -53,33 +53,18 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
     }
 
     @Override
-    public void increaseLoad(int threadStep, int delayStep) {
-        threadStep = Math.max(0, threadStep);
-        delayStep = Math.max(0, delayStep);
+    public void changeLoad(Integer newThreadCount, Integer newThreadDelay) {
         synchronized (reconfigureLock) {
-            // Increase number of threads and decrease the time each one waits
-            int numThreads = getConfig(NUM_THREADS) + threadStep;
-            setConfig(NUM_THREADS, numThreads);
-            Long delay = Math.max(0, getConfig(REQUEST_DELAY) - delayStep);
-            setConfig(REQUEST_DELAY, delay);
-            LOG.info("{} increasing load generated in future runs of plan: numThreads={}, delay={}, approximately {} requests/second",
-                    new Object[]{this, numThreads, delay, getPotentialRequestsPerSecond(numThreads, delay)});
-            reconfigure();
-        }
-    }
+            Integer currentThreadCount = getConfig(NUM_THREADS);
+            Integer currentThreadDelay = getConfig(REQUEST_DELAY);
+            newThreadCount = (newThreadCount != null) ? Math.max(1, newThreadCount) : currentThreadCount;
+            newThreadDelay = (newThreadDelay != null) ? Math.max(0, newThreadDelay) : currentThreadDelay;
 
-    @Override
-    public void decreaseLoad(int threadStep, int delayStep) {
-        threadStep = Math.max(0, threadStep);
-        delayStep = Math.max(0, delayStep);
-        synchronized (reconfigureLock) {
-            // Decrease number of threads and increase the time each one waits
-            Integer numThreads = Math.max(1, getConfig(NUM_THREADS) - threadStep);
-            long delay = getConfig(REQUEST_DELAY) + delayStep;
-            setConfig(NUM_THREADS, numThreads);
-            setConfig(REQUEST_DELAY, delay);
-            LOG.info("{} decreasing load generated in future runs of plan: numThreads={}, delay={}, approximately {} requests/second",
-                    new Object[]{this, numThreads, delay, getPotentialRequestsPerSecond(numThreads, delay)});
+            // Increase number of threads and decrease the time each one waits
+            setConfig(NUM_THREADS, newThreadCount);
+            setConfig(REQUEST_DELAY, newThreadDelay);
+            LOG.info("{} changing load generated: numThreads={}, delay={}, approximately {} requests/second",
+                    new Object[]{this, newThreadCount, newThreadDelay, getPotentialRequestsPerSecond(newThreadCount, newThreadDelay)});
             reconfigure();
         }
     }

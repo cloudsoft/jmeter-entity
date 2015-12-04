@@ -1,5 +1,7 @@
 package io.cloudsoft.jmeter;
 
+import javax.annotation.Nullable;
+
 import org.apache.brooklyn.api.entity.ImplementedBy;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.annotation.Effector;
@@ -43,41 +45,27 @@ public interface JMeterNode extends SoftwareProcess {
             10);
 
     @SetFromFlag("requestDelay")
-    ConfigKey<Long> REQUEST_DELAY = ConfigKeys.newLongConfigKey(
+    ConfigKey<Integer> REQUEST_DELAY = ConfigKeys.newIntegerConfigKey(
             "jmeter.requestDelay", "The period each thread should wait between requests in milliseconds",
-            100L);
+            100);
 
     MethodEffector<Void> PAUSE = new MethodEffector<>(JMeterNode.class, "pause");
     @Effector(description = "Stop the JMeter test plan's execution")
     void pause();
 
-    MethodEffector<Void> INCREASE_LOAD = new MethodEffector<>(JMeterNode.class, "increaseLoad");
-
-    @Effector(description = "Increase generated load")
-    void increaseLoad(
-            @EffectorParam(name = "threadStep",
-                    description = "The number of threads to change by when increasing/decreasing load",
-                    defaultValue = "2",
-                    nullable = false)
-            int threadStep,
-            @EffectorParam(name="delayStep",
-                    description="The delay to change by when increasing/decreasing load",
-                    defaultValue="10",
-                    nullable=false)
-            int delayStep);
-
-    MethodEffector<Void> DECREASE_LOAD = new MethodEffector<>(JMeterNode.class, "decreaseLoad");
-    @Effector(description = "Decrease generated load")
-    void decreaseLoad(
-            @EffectorParam(name = "threadStep",
-                    description = "The number of threads to change by when increasing/decreasing load",
-                    defaultValue = "2",
-                    nullable = false)
-            int threadStep,
-            @EffectorParam(name="delayStep",
-                    description="The delay to change by when increasing/decreasing load",
-                    defaultValue="10",
-                    nullable=false)
-            int delayStep);
+    MethodEffector<Void> CHANGE_LOAD = new MethodEffector<>(JMeterNode.class, "changeLoad");
+    @Effector(description = "Adjust the generated load. Generated requests/second will be " +
+            "roughly newThreadCount * (1000 / newDelayCount)")
+    void changeLoad(
+            @Nullable
+            @EffectorParam(name = "newThreadCount",
+                    description = "The number of threads the plan should use",
+                    nullable = true)
+            Integer newThreadCount,
+            @Nullable
+            @EffectorParam(name="newDelayCount",
+                    description="The period in milliseconds each thread should wait between requests",
+                    nullable=true)
+            Integer newDelayCount);
 
 }
