@@ -100,8 +100,8 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     }
 
     protected CharSequence getStopCommand() {
-        // shutdown.sh is graceful. Could also use stoptest.sh to terminate abruptly.
-        return new StringBuilder(getExpandedInstallDir()).append("/bin/shutdown.sh");
+        // Proper way to do it is to use shutdown.sh (graceful) or stoptest.sh (abrupt).
+        return "ps aux | grep ApacheJMeter | grep -v grep | awk '{ print $2 }' | xargs kill -15";
     }
 
 }
