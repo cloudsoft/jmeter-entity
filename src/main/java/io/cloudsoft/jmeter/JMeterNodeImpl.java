@@ -48,8 +48,6 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
     private void reconfigure() {
         if (getDriver() != null) {
             getDriver().reconfigure(true);
-            pause();
-            getDriver().start();
             LOG.debug("Reconfigured and restarted JMeter");
         }
     }
