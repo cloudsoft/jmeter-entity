@@ -47,7 +47,7 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
     @GuardedBy("reconfigureLock")
     private void reconfigure() {
         if (getDriver() != null) {
-            getDriver().reconfigure();
+            getDriver().reconfigure(true);
             pause();
             getDriver().start();
             LOG.debug("Reconfigured and restarted JMeter");
@@ -55,43 +55,40 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
     }
 
     @Override
-    public void increaseLoad() {
+    public void increaseLoad(int threadStep, int delayStep) {
+        threadStep = Math.max(0, threadStep);
+        delayStep = Math.max(0, delayStep);
         synchronized (reconfigureLock) {
             // Increase number of threads and decrease the time each one waits
-            int numThreads = getConfig(NUM_THREADS) + getThreadStep();
+            int numThreads = getConfig(NUM_THREADS) + threadStep;
             setConfig(NUM_THREADS, numThreads);
-            Long delay = Math.max(0, getConfig(REQUEST_DELAY) - getDelayStep());
+            Long delay = Math.max(0, getConfig(REQUEST_DELAY) - delayStep);
             setConfig(REQUEST_DELAY, delay);
-            LOG.info("{} increasing load generated in future runs of plan: numThreads={}, delay={}, potential requests/second={}",
+            LOG.info("{} increasing load generated in future runs of plan: numThreads={}, delay={}, approximately {} requests/second",
                     new Object[]{this, numThreads, delay, getPotentialRequestsPerSecond(numThreads, delay)});
             reconfigure();
         }
     }
 
     @Override
-    public void decreaseLoad() {
+    public void decreaseLoad(int threadStep, int delayStep) {
+        threadStep = Math.max(0, threadStep);
+        delayStep = Math.max(0, delayStep);
         synchronized (reconfigureLock) {
             // Decrease number of threads and increase the time each one waits
-            Integer numThreads = Math.max(1, getConfig(NUM_THREADS) - getThreadStep());
-            long delay = getConfig(REQUEST_DELAY) + getDelayStep();
+            Integer numThreads = Math.max(1, getConfig(NUM_THREADS) - threadStep);
+            long delay = getConfig(REQUEST_DELAY) + delayStep;
             setConfig(NUM_THREADS, numThreads);
             setConfig(REQUEST_DELAY, delay);
-            LOG.info("{} decreasing load generated in future runs of plan: numThreads={}, delay={}, potential requests/second={}",
+            LOG.info("{} decreasing load generated in future runs of plan: numThreads={}, delay={}, approximately {} requests/second",
                     new Object[]{this, numThreads, delay, getPotentialRequestsPerSecond(numThreads, delay)});
             reconfigure();
         }
     }
 
     private long getPotentialRequestsPerSecond(int numThreads, long delay) {
+        delay = delay == 0 ? 1 : delay;
         return numThreads * (1000 / delay);
-    }
-
-    private int getThreadStep() {
-        return getConfig(THREAD_STEP);
-    }
-
-    private long getDelayStep() {
-        return getConfig(DELAY_STEP);
     }
 
 }

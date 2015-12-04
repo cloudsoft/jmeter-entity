@@ -3,6 +3,7 @@ package io.cloudsoft.jmeter;
 import org.apache.brooklyn.api.entity.ImplementedBy;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.annotation.Effector;
+import org.apache.brooklyn.core.annotation.EffectorParam;
 import org.apache.brooklyn.core.config.ConfigKeys;
 import org.apache.brooklyn.core.effector.MethodEffector;
 import org.apache.brooklyn.core.entity.Attributes;
@@ -46,26 +47,37 @@ public interface JMeterNode extends SoftwareProcess {
             "jmeter.requestDelay", "The period each thread should wait between requests in milliseconds",
             100L);
 
-    @SetFromFlag("threadStep")
-    ConfigKey<Integer> THREAD_STEP = ConfigKeys.newIntegerConfigKey(
-            "jmeter.threadStep", "The number of threads to change by when increasing/decreasing load",
-            2);
-
-    @SetFromFlag("delayStep")
-    ConfigKey<Long> DELAY_STEP = ConfigKeys.newLongConfigKey(
-            "jmeter.delayStep", "The delay to change by when increasing/decreasing load",
-            20L);
-
     MethodEffector<Void> PAUSE = new MethodEffector<>(JMeterNode.class, "pause");
     @Effector(description = "Stop the JMeter test plan's execution")
     void pause();
 
     MethodEffector<Void> INCREASE_LOAD = new MethodEffector<>(JMeterNode.class, "increaseLoad");
+
     @Effector(description = "Increase generated load")
-    void increaseLoad();
+    void increaseLoad(
+            @EffectorParam(name = "threadStep",
+                    description = "The number of threads to change by when increasing/decreasing load",
+                    defaultValue = "2",
+                    nullable = false)
+            int threadStep,
+            @EffectorParam(name="delayStep",
+                    description="The delay to change by when increasing/decreasing load",
+                    defaultValue="10",
+                    nullable=false)
+            int delayStep);
 
     MethodEffector<Void> DECREASE_LOAD = new MethodEffector<>(JMeterNode.class, "decreaseLoad");
     @Effector(description = "Decrease generated load")
-    void decreaseLoad();
+    void decreaseLoad(
+            @EffectorParam(name = "threadStep",
+                    description = "The number of threads to change by when increasing/decreasing load",
+                    defaultValue = "2",
+                    nullable = false)
+            int threadStep,
+            @EffectorParam(name="delayStep",
+                    description="The delay to change by when increasing/decreasing load",
+                    defaultValue="10",
+                    nullable=false)
+            int delayStep);
 
 }

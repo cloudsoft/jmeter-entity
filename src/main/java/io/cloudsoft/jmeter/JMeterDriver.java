@@ -4,6 +4,6 @@ import org.apache.brooklyn.entity.java.JavaSoftwareProcessDriver;
 
 public interface JMeterDriver extends JavaSoftwareProcessDriver {
 
-    void reconfigure();
+    void reconfigure(boolean restartProcess);
 
 }

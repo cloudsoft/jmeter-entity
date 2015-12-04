@@ -51,14 +51,7 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
     @Override
     public void launch() {
-        StringBuilder command = new StringBuilder("nohup ")
-                .append(getExpandedInstallDir())
-                .append("/bin/jmeter ")
-                .append("-n ") // Non-GUI mode
-                .append("-t ").append(getTestPlanLocation()).append(" ") // Test plan to run
-                .append("-l ").append(getLogFileLocation()).append(" ")  // Log file location
-                .append(" >/dev/null 2>/dev/null &");
-        newScript("run-test-plan").failOnNonZeroResultCode().body.append(command)
+        newScript("run-test-plan").failOnNonZeroResultCode().body.append(getLaunchCommand())
                 .gatherOutput()
                 .failOnNonZeroResultCode()
                 .execute();
@@ -74,10 +67,7 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
     @Override
     public void stop() {
-        // shutdown.sh is graceful. Could also use stoptest.sh to terminate abruptly.
-        StringBuilder command = new StringBuilder(getExpandedInstallDir())
-                .append("/bin/shutdown.sh");
-        newScript(STOPPING).body.append(command).execute();
+        newScript(STOPPING).body.append(getStopCommand()).execute();
     }
 
     protected String getTestPlanLocation() {
@@ -90,8 +80,28 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     }
 
     @Override
-    public void reconfigure() {
+    public void reconfigure(boolean restartProcess) {
         customize();
+        if (restartProcess) {
+            newScript("Reloading").failOnNonZeroResultCode()
+                    .body.append(getStopCommand(), getLaunchCommand())
+                    .execute();
+        }
+    }
+
+    protected CharSequence getLaunchCommand() {
+        return new StringBuilder("nohup ")
+                .append(getExpandedInstallDir())
+                .append("/bin/jmeter ")
+                .append("-n ") // Non-GUI mode
+                .append("-t ").append(getTestPlanLocation()).append(" ") // Test plan to run
+                .append("-l ").append(getLogFileLocation()).append(" ")  // Log file location
+                .append(" >/dev/null 2>/dev/null &");
+    }
+
+    protected CharSequence getStopCommand() {
+        // shutdown.sh is graceful. Could also use stoptest.sh to terminate abruptly.
+        return new StringBuilder(getExpandedInstallDir()).append("/bin/shutdown.sh");
     }
 
 }
