@@ -2,6 +2,7 @@ package io.cloudsoft.jmeter;
 
 import javax.annotation.Nullable;
 
+import org.apache.brooklyn.api.catalog.Catalog;
 import org.apache.brooklyn.api.entity.ImplementedBy;
 import org.apache.brooklyn.config.ConfigKey;
 import org.apache.brooklyn.core.annotation.Effector;
@@ -14,6 +15,9 @@ import org.apache.brooklyn.core.sensor.BasicAttributeSensorAndConfigKey;
 import org.apache.brooklyn.entity.software.base.SoftwareProcess;
 import org.apache.brooklyn.util.core.flags.SetFromFlag;
 
+@Catalog(name = "Apache JMeter",
+        description = "Uses Apache JMeter to generate load against a configurable URL",
+        iconUrl = "classpath://io/cloudsoft/jmeter/logo.jpg")
 @ImplementedBy(JMeterNodeImpl.class)
 public interface JMeterNode extends SoftwareProcess {
 
