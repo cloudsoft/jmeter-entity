@@ -6,7 +6,7 @@
 
     <groupId>io.cloudsoft.jmeter</groupId>
     <artifactId>brooklyn-jmeter</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>brooklyn-jmeter</name>
@@ -84,8 +84,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>3.0.1</version>
                 <extensions>true</extensions>
-                <!-- configure plugin to generate MANIFEST.MF
-                     adapted from http://blog.knowhowlab.org/2010/06/osgi-tutorial-from-project-structure-to.html -->
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -100,7 +98,6 @@
                         <supportedProjectType>jar</supportedProjectType>
                     </supportedProjectTypes>
                     <instructions>
-                        <Export-Package>brooklyn.*,org.apache.brooklyn.*</Export-Package>
                         <!-- Brooklyn-Feature prefix triggers inclusion of the project's metadata in the server's features list. -->
                         <Brooklyn-Feature-Name>${project.name}</Brooklyn-Feature-Name>
                     </instructions>
@@ -118,5 +115,5 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
+
