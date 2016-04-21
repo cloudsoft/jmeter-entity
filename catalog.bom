@@ -8,6 +8,10 @@ brooklyn.catalog:
   description: |
     Runs Apache JMeter against a configured endpoint.
 
+  publish:
+    license_code: Apache-2.0
+    overview: README.md
+
   item:
     type: io.cloudsoft.jmeter.JMeterNode
     name: JMeter Node
