@@ -6,7 +6,7 @@
 
     <groupId>io.cloudsoft.jmeter</groupId>
     <artifactId>brooklyn-jmeter</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.8.0</version>
     <packaging>jar</packaging>
 
     <parent>
