@@ -40,7 +40,8 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
         newScript(INSTALLING)
                 .failOnNonZeroResultCode()
-                .body.append(commands).execute();
+                .body.append(commands)
+                .execute();
     }
 
     @Override
@@ -51,9 +52,10 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
     @Override
     public void launch() {
-        newScript("run-test-plan").failOnNonZeroResultCode().body.append(getLaunchCommand())
-                .gatherOutput()
+        newScript("run-test-plan")
                 .failOnNonZeroResultCode()
+                .body.append(getLaunchCommand())
+                .gatherOutput()
                 .execute();
     }
 
@@ -61,7 +63,9 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     public boolean isRunning() {
         StringBuilder command = new StringBuilder(getExpandedInstallDir())
                 .append("/bin/jmeter -v");
-        return newScript(CHECK_RUNNING).failOnNonZeroResultCode().body.append(command)
+        return newScript(CHECK_RUNNING)
+                .failOnNonZeroResultCode()
+                .body.append(command)
                 .execute() == 0;
     }
 

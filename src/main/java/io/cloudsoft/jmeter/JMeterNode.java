@@ -11,7 +11,6 @@ import org.apache.brooklyn.core.config.ConfigKeys;
 import org.apache.brooklyn.core.effector.MethodEffector;
 import org.apache.brooklyn.core.entity.Attributes;
 import org.apache.brooklyn.core.sensor.AttributeSensorAndConfigKey;
-import org.apache.brooklyn.core.sensor.BasicAttributeSensorAndConfigKey;
 import org.apache.brooklyn.entity.software.base.SoftwareProcess;
 import org.apache.brooklyn.util.core.flags.SetFromFlag;
 
@@ -24,12 +23,12 @@ public interface JMeterNode extends SoftwareProcess {
     ConfigKey<String> SUGGESTED_VERSION = ConfigKeys.newConfigKeyWithDefault(SoftwareProcess.SUGGESTED_VERSION,
             "2.13");
 
-    AttributeSensorAndConfigKey<String, String> DOWNLOAD_URL = new BasicAttributeSensorAndConfigKey.StringAttributeSensorAndConfigKey(
+    AttributeSensorAndConfigKey<String, String> DOWNLOAD_URL = ConfigKeys.newSensorAndConfigKeyWithDefault(
             Attributes.DOWNLOAD_URL,
-            "http://mirrors.muzzy.org.uk/apache//jmeter/binaries/apache-jmeter-${version}.tgz");
+            "http://mirrors.muzzy.org.uk/apache/jmeter/binaries/apache-jmeter-${version}.tgz");
 
     @SetFromFlag("plan")
-    BasicAttributeSensorAndConfigKey<String> TEST_PLAN_URL = new BasicAttributeSensorAndConfigKey.StringAttributeSensorAndConfigKey(
+    AttributeSensorAndConfigKey<String, String> TEST_PLAN_URL = ConfigKeys.newStringSensorAndConfigKey(
             "jmeter.testPlan", "A URL of a jmx file to run",
             "classpath://io/cloudsoft/jmeter/load.jmx");
 

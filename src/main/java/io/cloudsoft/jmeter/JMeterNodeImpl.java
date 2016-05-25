@@ -44,7 +44,6 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
     /**
      * Copies new configuration and cycles the JMeter process.
      */
-    @GuardedBy("reconfigureLock")
     private void reconfigure() {
         if (getDriver() != null) {
             getDriver().reconfigure(true);
@@ -53,6 +52,7 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
     }
 
     @Override
+    @GuardedBy("reconfigureLock")
     public void changeLoad(Integer newThreadCount, Integer newThreadDelay) {
         synchronized (reconfigureLock) {
             Integer currentThreadCount = getConfig(NUM_THREADS);
@@ -61,8 +61,8 @@ public class JMeterNodeImpl extends SoftwareProcessImpl implements JMeterNode {
             newThreadDelay = (newThreadDelay != null) ? Math.max(0, newThreadDelay) : currentThreadDelay;
 
             // Increase number of threads and decrease the time each one waits
-            setConfig(NUM_THREADS, newThreadCount);
-            setConfig(REQUEST_DELAY, newThreadDelay);
+            config().set(NUM_THREADS, newThreadCount);
+            config().set(REQUEST_DELAY, newThreadDelay);
             LOG.info("{} changing load generated: numThreads={}, delay={}, approximately {} requests/second",
                     new Object[]{this, newThreadCount, newThreadDelay, getPotentialRequestsPerSecond(newThreadCount, newThreadDelay)});
             reconfigure();
