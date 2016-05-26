@@ -62,7 +62,7 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     @Override
     public boolean isRunning() {
         StringBuilder command = new StringBuilder(getExpandedInstallDir())
-                .append("/bin/jmeter -v");
+                .append("/usr/bin/pgrep jmeter");
         return newScript(CHECK_RUNNING)
                 .failOnNonZeroResultCode()
                 .body.append(command)
