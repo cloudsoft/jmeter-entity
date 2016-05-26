@@ -54,6 +54,7 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     public void launch() {
         newScript("run-test-plan")
                 .failOnNonZeroResultCode()
+                .body.append(getRemovePauseLockfileCommand())
                 .body.append(getLaunchCommand())
                 .gatherOutput()
                 .execute();
@@ -61,17 +62,24 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
 
     @Override
     public boolean isRunning() {
-        StringBuilder command = new StringBuilder(getExpandedInstallDir())
-                .append("/usr/bin/pgrep jmeter");
         return newScript(CHECK_RUNNING)
                 .failOnNonZeroResultCode()
-                .body.append(command)
+                .body.append(
+                        format("if [ -e %1$s/.paused ] && test `find \"%1$s/.paused\" -mmin 10`; then", getRunDir()),
+                                "    echo \"JMeter is currently paused, ignoring process state\"\n" +
+                                "    exit 0\n" +
+                                "fi\n" +
+                                "/usr/bin/pgrep jmeter\n"
+                )
                 .execute() == 0;
     }
 
     @Override
     public void stop() {
-        newScript(STOPPING).body.append(getStopCommand()).execute();
+        newScript(STOPPING)
+                .body.append(getRemovePauseLockfileCommand())
+                .body.append(getStopCommand())
+                .execute();
     }
 
     protected String getTestPlanLocation() {
@@ -88,7 +96,10 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
         customize();
         if (restartProcess) {
             newScript("Reloading").failOnNonZeroResultCode()
-                    .body.append(getStopCommand(), getLaunchCommand())
+                    .body.append(getCreatePauseLockfileCommand())
+                    .body.append(getStopCommand())
+                    .body.append(getLaunchCommand())
+                    .body.append(getRemovePauseLockfileCommand())
                     .execute();
         }
     }
@@ -106,6 +117,14 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     protected CharSequence getStopCommand() {
         // Proper way to do it is to use shutdown.sh (graceful) or stoptest.sh (abrupt).
         return "ps aux | grep ApacheJMeter | grep -v grep | awk '{ print $2 }' | xargs kill -15";
+    }
+
+    protected CharSequence getCreatePauseLockfileCommand() {
+        return format("touch %s/.paused", getRunDir());
+    }
+
+    protected CharSequence getRemovePauseLockfileCommand() {
+        return format("if [ -e %1$s/.paused ]; then rm %1$s/.paused; fi", getRunDir());
     }
 
 }
