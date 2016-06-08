@@ -21,7 +21,7 @@ import org.apache.brooklyn.util.core.flags.SetFromFlag;
 public interface JMeterNode extends SoftwareProcess {
 
     ConfigKey<String> SUGGESTED_VERSION = ConfigKeys.newConfigKeyWithDefault(SoftwareProcess.SUGGESTED_VERSION,
-            "2.13");
+            "3.0");
 
     AttributeSensorAndConfigKey<String, String> DOWNLOAD_URL = ConfigKeys.newSensorAndConfigKeyWithDefault(
             Attributes.DOWNLOAD_URL,
