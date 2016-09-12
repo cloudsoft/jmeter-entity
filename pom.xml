@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,9 +15,30 @@
     </parent>
 
     <name>brooklyn-jmeter</name>
-    <description>
-        An entity that invokes Apache Jmeter
-    </description>
+    <description>An entity that invokes Apache Jmeter</description>
+    <url>https://github.com/cloudsoft/jmeter-entity</url>
+
+    <licenses>
+        <license>
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/cloudsoft/jmeter-entity</url>
+        <connection>scm:git:https://github.com/cloudsoft/jmeter-entity.git</connection>
+        <developerConnection>scm:git:git@github.com:cloudsoft/jmeter-entity.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Cloudsoft Developers</name>
+            <organization>Cloudsoft</organization>
+            <organizationUrl>http://www.cloudsoft.io</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <java.version>1.7</java.version>
