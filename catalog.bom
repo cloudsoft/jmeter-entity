@@ -2,7 +2,7 @@ brooklyn.catalog:
   id: jmeter
   displayName: Apache JMeter
   version: 0.9.0
-  iconUrl: classpath://io/cloudsoft/jmeter/logo.jpg
+  iconUrl: https://upload.wikimedia.org/wikipedia/commons/2/22/Apache_JMeter.png
   license: Apache-2.0
 
   description: |
