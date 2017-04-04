@@ -2,6 +2,8 @@ package io.cloudsoft.jmeter;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.brooklyn.api.entity.EntityLocal;
@@ -12,8 +14,6 @@ import org.apache.brooklyn.util.net.Urls;
 import org.apache.brooklyn.util.os.Os;
 import org.apache.brooklyn.util.ssh.BashCommands;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMeterDriver {
 
@@ -33,10 +33,11 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
         List<String> urls = resolver.getTargets();
         String saveAs = resolver.getFilename();
 
-        List<String> commands = ImmutableList.<String>builder()
-                .addAll(BashCommands.commandsToDownloadUrlsAs(urls, saveAs))
-                .add("tar xvfz " + saveAs)
-                .build();
+
+        List<String> commands = new ArrayList<String>();
+        commands.addAll(BashCommands.commandsToDownloadUrlsAs(urls, saveAs));
+        commands.add("tar xvfz " + saveAs);
+
 
         newScript(INSTALLING)
                 .failOnNonZeroResultCode()
@@ -47,7 +48,7 @@ public class JMeterSshDriver extends JavaSoftwareProcessSshDriver implements JMe
     @Override
     public void customize() {
         String template = entity.getConfig(JMeterNode.TEST_PLAN_URL);
-        copyTemplate(template, getTestPlanLocation(), true, ImmutableMap.<String,String>of());
+        copyTemplate(template, getTestPlanLocation(), true, Collections.<String, String>emptyMap());
     }
 
     @Override
