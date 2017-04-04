@@ -13,3 +13,7 @@ Releasing
 mvn -Psonatype-oss-release release:clean release:prepare release:perform 
 ```
 
+Example
+-------
+
+The [catalog.bom](catalog.bom) contains a simple example application that generates http requests on a specified `target`, `port` and `path` 

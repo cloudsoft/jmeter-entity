@@ -1,18 +1,50 @@
 brooklyn.catalog:
-  id: jmeter
-  displayName: Apache JMeter
-  version: 0.9.0
-  iconUrl: https://upload.wikimedia.org/wikipedia/commons/2/22/Apache_JMeter.png
-  license: Apache-2.0
-
-  description: |
-    Runs Apache JMeter against a configured endpoint.
-
+  version: "0.1-SNAPSHOT"
   publish:
     license_code: Apache-2.0
     overview: README.md
 
-  item:
-    type: io.cloudsoft.jmeter.JMeterNode
-    name: JMeter Node
+  brooklyn.libraries:
+  - https://oss.sonatype.org/content/repositories/snapshots/io/cloudsoft/jmeter/brooklyn-jmeter/0.11.0-SNAPSHOT/brooklyn-jmeter-0.11.0-20170404.145804-2.jar
 
+  items:
+    - id: jmeter-load-app
+      iconUrl: classpath://io/cloudsoft/jmeter/logo.jpg
+      name: Load Generator
+      description: |
+        An entity to send http requests
+      itemType: template
+      item:
+        services:
+          - type: org.apache.brooklyn.entity.stock.BasicApplication
+            brooklyn.parameters:
+              - name: target
+                type: string
+                label: Target
+                description: The target address
+                pinned: true
+                constraints:
+                - required
+              - name: port
+                type: int
+                label: Port
+                description: The target port
+                pinned: true
+                constraints:
+                - required
+              - name: path
+                type: string
+                label: path
+                description: The target path
+                pinned: true
+            brooklyn.children:
+              - type: jmeter
+
+    - id: jmeter
+      item:
+        type: io.cloudsoft.jmeter.JMeterNode
+        brooklyn.config:
+          dontRequireTtyForSudo: true
+          provisioning.properties:
+            osFamily: centos
+            osVersionRegex: 7
