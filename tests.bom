@@ -1,0 +1,125 @@
+brooklyn.catalog:
+  version: "0.11.0-SNAPSHOT"
+  license_code: APACHE-2.0
+
+  brooklyn.libraries:
+  - /Users/sam/code/cloudsoft/jmeter-entity/target/brooklyn-jmeter-0.11.0-SNAPSHOT.jar
+
+  items:
+  - id: test-case
+    item:
+      type: org.apache.brooklyn.test.framework.TestCase
+
+  - id: ssh-test
+    item:
+      type: org.apache.brooklyn.test.framework.TestSshCommand
+
+  - id: sensor-test
+    item:
+      type: org.apache.brooklyn.test.framework.TestSensor
+      # sensor: name
+
+  - id: assert-up-initial
+    item:
+      type: org.apache.brooklyn.test.framework.TestSensor
+      name: "TEST [service.isUp] IS [true]"
+      sensor: service.isUp
+      brooklyn.parameters:
+        - name: timeout.initialStartup
+          description: The timeout for provisioning, installing and launching the app-under-test.
+          type: org.apache.brooklyn.util.time.Duration
+          default: 1h
+      brooklyn.config:
+        timeout: $brooklyn:config("timeout.initialStartup")
+      assert:
+        - equals: true
+
+  - id: assert-up
+    item:
+      type: sensor-test
+      name: "TEST [service.isUp] IS [true]"
+      sensor: service.isUp
+      assert:
+        - equals: true
+
+  - id: test-reqsPerSec
+    item:
+      type: sensor-test
+      name: "TEST [webapp.reqs.perSec.last]"
+      brooklyn.config:
+        sensor: webapp.reqs.perSec.last
+
+  - id: jmeter-test-case
+    item:
+      type: org.apache.brooklyn.entity.stock.BasicApplication
+      brooklyn.children:
+
+      - id: tomcat
+        type: org.apache.brooklyn.entity.webapp.tomcat.TomcatServer
+
+      - id: jmeter
+        type: jmeter
+        brooklyn.config:
+          target: $brooklyn:entity("tomcat").attributeWhenReady("host.address")
+          port: $brooklyn:entity("tomcat").attributeWhenReady("http.port")
+          # TODO: Should test load sent to the path.
+          path: "/foo"
+
+      - type: org.apache.brooklyn.test.framework.TestCase
+        brooklyn.children:
+        - type: assert-up-initial
+          name: "01. Tomcat isUp"
+          brooklyn.config:
+            targetId: tomcat
+
+        - type: assert-up-initial
+          name: "02. JMeter isUp"
+          brooklyn.config:
+            targetId: jmeter
+
+        # JMeter should be sending up to 100 reqs/second.
+        - type: test-reqsPerSec
+          name: "03. TEST [webapp.reqs.perSec.last] IS [between 80 and 110]"
+          brooklyn.config:
+            targetId: tomcat
+            timeout: 30s
+            assert:
+              greaterThan: 80.0
+              lessThan: 110.0
+
+        # Increase the load and assert more reqs/second.
+        - type: org.apache.brooklyn.test.framework.TestEffector
+          name: "04. Change load to 200 reqs/sec"
+          brooklyn.config:
+            targetId: jmeter
+            effector: changeLoad
+            params:
+              # Double the load
+              newThreadCount: 10
+              newDelayCount: 50
+
+        - type: test-reqsPerSec
+          name: "05. TEST [webapp.reqs.perSec.last] IS [between 160 and 210]"
+          brooklyn.config:
+            targetId: tomcat
+            timeout: 30s
+            assert:
+              greaterThan: 180.0
+              lessThan: 210.0
+
+        # Pause and assert that requests drop off.
+        - type: org.apache.brooklyn.test.framework.TestEffector
+          name: "06. Pause JMeter"
+          brooklyn.config:
+            targetId: jmeter
+            effector: pause
+
+        # There'll still be a little load from Brooklyn as it polls for sensor data.
+        - type: test-reqsPerSec
+          name: "07. TEST [webapp.reqs.perSec.last] IS [between 0 and 10]"
+          brooklyn.config:
+            targetId: tomcat
+            timeout: 30s
+            assert:
+              greaterThan: -1.0
+              lessThan: 10.0
