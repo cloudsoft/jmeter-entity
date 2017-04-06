@@ -2,9 +2,6 @@ brooklyn.catalog:
   version: "0.11.0-SNAPSHOT"
   license_code: APACHE-2.0
 
-  brooklyn.libraries:
-  - /Users/sam/code/cloudsoft/jmeter-entity/target/brooklyn-jmeter-0.11.0-SNAPSHOT.jar
-
   items:
   - id: test-case
     item:
