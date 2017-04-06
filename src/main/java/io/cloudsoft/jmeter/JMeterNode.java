@@ -25,7 +25,7 @@ public interface JMeterNode extends SoftwareProcess {
 
     AttributeSensorAndConfigKey<String, String> DOWNLOAD_URL = ConfigKeys.newSensorAndConfigKeyWithDefault(
             Attributes.DOWNLOAD_URL,
-            "http://apache.mirror.anlx.net/jmeter/binaries/apache-jmeter-${version}.tgz");
+            "http://download.nextag.com/apache/jmeter/binaries/apache-jmeter-${version}.tgz");
 
     @SetFromFlag("plan")
     AttributeSensorAndConfigKey<String, String> TEST_PLAN_URL = ConfigKeys.newStringSensorAndConfigKey(
