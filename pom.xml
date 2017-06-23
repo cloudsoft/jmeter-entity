@@ -5,14 +5,8 @@
 
     <groupId>io.cloudsoft.jmeter</groupId>
     <artifactId>brooklyn-jmeter</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
+    <version>0.12.0-SNAPSHOT</version><!-- BROOKLYN_VERSION -->
+    <packaging>bundle</packaging>
 
     <name>brooklyn-jmeter</name>
     <description>An entity that invokes Apache Jmeter</description>
@@ -41,8 +35,8 @@
     </developers>
 
     <properties>
-        <java.version>1.7</java.version>
-        <brooklyn.version>0.11.0-SNAPSHOT</brooklyn.version>
+        <java.version>1.8</java.version>
+        <brooklyn.version>0.12.0-SNAPSHOT</brooklyn.version><!-- BROOKLYN_VERSION -->
     </properties>
 
     <repositories>
@@ -103,6 +97,19 @@
     </dependencies>
 
     <build>
+    	<resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>catalog</directory>
+                <filtering>false</filtering>
+			</resource>
+            <resource>
+                <directory>feature</directory>
+                <filtering>true</filtering>
+			</resource>
+		</resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -116,7 +123,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.0.1</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -127,27 +133,131 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <supportedProjectTypes>
-                        <supportedProjectType>jar</supportedProjectType>
-                    </supportedProjectTypes>
-                    <instructions>
-                        <!-- Brooklyn-Feature prefix triggers inclusion of the project's metadata in the server's features list. -->
-                        <Brooklyn-Feature-Name>${project.name}</Brooklyn-Feature-Name>
-                    </instructions>
-                </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <version>2.6</version>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifact</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.outputDirectory}/jmeter/catalog.bom</file>
+                                    <classifier>jmeter</classifier>
+                                    <type>bom</type>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.build.outputDirectory}/feature.xml</file>
+                                    <classifier>features</classifier>
+                                    <type>xml</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+			</plugin>
         </plugins>
     </build>
-
+    
+    <profiles>
+        <profile>
+            <id>Release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                </property>
+            </activation>
+            <properties>
+                <gpg.passphrase/>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <inherited>true</inherited>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <use>false</use>
+                            <links>
+                                <link>http://download.oracle.com/javaee/6/api</link>
+                            </links>
+                            <keywords>true</keywords>
+                            <author>false</author>
+                            <quiet>true</quiet>
+                            <aggregate>false</aggregate>
+                            <detectLinks/>
+                            <tags>
+                                <tag>
+                                    <name>todo</name>
+                                    <placement>a</placement>
+                                    <head>To-do:</head>
+                                </tag>
+                            </tags>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>sonatype-nexus-repo</id>
+            <activation>
+                <property>
+                    <name>deployTo</name>
+                    <value>sonatype</value>
+                </property>
+            </activation>
+            <distributionManagement>
+                <repository>
+                    <id>sonatype-nexus-staging</id>
+                    <name>Nexus Release Repository</name>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>sonatype-nexus-snapshots</id>
+                    <name>Sonatype Nexus Snapshots</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+	</profiles>
 </project>
