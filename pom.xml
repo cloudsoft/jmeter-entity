@@ -5,7 +5,7 @@
 
     <groupId>io.cloudsoft.jmeter</groupId>
     <artifactId>brooklyn-jmeter</artifactId>
-    <version>0.12.0-SNAPSHOT</version><!-- BROOKLYN_VERSION -->
+    <version>1.0.0-SNAPSHOT</version><!-- JMETER_ENTITY_VERSION -->
     <packaging>bundle</packaging>
 
     <name>brooklyn-jmeter</name>
@@ -36,7 +36,9 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <brooklyn.version>0.12.0-SNAPSHOT</brooklyn.version><!-- BROOKLYN_VERSION -->
+        <brooklyn.version>1.0.0-SNAPSHOT</brooklyn.version><!-- BROOKLYN_VERSION -->
+        <jsr305.version>2.0.1</jsr305.version>
+        <slf4j.version>1.6.6</slf4j.version>
     </properties>
 
     <repositories>
@@ -87,12 +89,12 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>2.0.1</version>
+            <version>${jsr305.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.6</version>
+            <version>${slf4j.version}</version>
         </dependency>
     </dependencies>
 
@@ -102,14 +104,10 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>catalog</directory>
+                <directory>catalog/jmeter</directory>
                 <filtering>false</filtering>
-			</resource>
-            <resource>
-                <directory>feature</directory>
-                <filtering>true</filtering>
-			</resource>
-		</resources>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -134,33 +132,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-artifact</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.outputDirectory}/jmeter/catalog.bom</file>
-                                    <classifier>jmeter</classifier>
-                                    <type>bom</type>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.build.outputDirectory}/feature.xml</file>
-                                    <classifier>features</classifier>
-                                    <type>xml</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-			</plugin>
         </plugins>
     </build>
     
