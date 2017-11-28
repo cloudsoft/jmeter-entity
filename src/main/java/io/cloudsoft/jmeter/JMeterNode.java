@@ -11,6 +11,7 @@ import org.apache.brooklyn.core.config.ConfigKeys;
 import org.apache.brooklyn.core.effector.MethodEffector;
 import org.apache.brooklyn.core.entity.Attributes;
 import org.apache.brooklyn.core.sensor.AttributeSensorAndConfigKey;
+import org.apache.brooklyn.entity.java.UsesJava;
 import org.apache.brooklyn.entity.software.base.SoftwareProcess;
 import org.apache.brooklyn.util.core.flags.SetFromFlag;
 
@@ -18,14 +19,16 @@ import org.apache.brooklyn.util.core.flags.SetFromFlag;
         description = "Uses Apache JMeter to generate load against a configurable URL",
         iconUrl = "classpath://io/cloudsoft/jmeter/logo.jpg")
 @ImplementedBy(JMeterNodeImpl.class)
-public interface JMeterNode extends SoftwareProcess {
+public interface JMeterNode extends SoftwareProcess, UsesJava {
 
     ConfigKey<String> SUGGESTED_VERSION = ConfigKeys.newConfigKeyWithDefault(SoftwareProcess.SUGGESTED_VERSION,
-            "3.1");
+            "3.3");
 
     AttributeSensorAndConfigKey<String, String> DOWNLOAD_URL = ConfigKeys.newSensorAndConfigKeyWithDefault(
             Attributes.DOWNLOAD_URL,
             "http://download.nextag.com/apache/jmeter/binaries/apache-jmeter-${version}.tgz");
+
+    ConfigKey<String> JAVA_VERSION_REQUIRED = ConfigKeys.newConfigKeyWithDefault(UsesJava.JAVA_VERSION_REQUIRED, "1.8");
 
     @SetFromFlag("plan")
     AttributeSensorAndConfigKey<String, String> TEST_PLAN_URL = ConfigKeys.newStringSensorAndConfigKey(
